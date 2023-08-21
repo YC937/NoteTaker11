@@ -15,6 +15,7 @@ This Node.js application is built on Express. Type in 'npm i' to install the dep
 ## 
 
 Link to the repository: https://github.com/YC937/NoteTaker11
+
 Link to the deployed website: https://ycnotetaker-59d803ada450.herokuapp.com/
 
 &copy;Copyright YM C
