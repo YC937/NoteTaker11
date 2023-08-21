@@ -1,46 +1,43 @@
-const notes = require('express').Router();
-const { readFromFile, readAndAppend } = require('../helpers/fsUtils');
-const uuid = require('../helpers/uuid');
+const router = require('express').Router();
+const uuid = require('uuid');
 const db = require("../db/notes.json");
 const fs = require("fs");
 let notesData = db;
-// Use get route for retrieving all the notes
-notes.get('/notes', (req, res) => {
-  console.info(`${req.method} request received for notes`);
-  readFromFile('./db/notes.json').then((data) => res.json(JSON.parse(data)));
+
+// Get route for notes
+router.get('/', (req, res) => {
+    fs.readFile('db/db.json', function (err, data) {
+        res.json(JSON.parse(data))
+    })
 });
 
-// Post route for another note
-notes.post('/notes', (req, res) => {
-  console.info(`${req.method} request received to add a note`);
-  console.log(req.body);
-  const { title, text } = req.body;
-
-  if (req.body) {
-    const newNotes = {
-      title,
-      text,
-      id: uuid(),
-    };
-
-    readAndAppend(newNotes, './db/notes.json');
-    res.json(`Notes added successfully 🚀`);
-  } else {
-    res.error('Error in adding notes');
-  }
+// Post route for new note
+router.post('/', (req, res) => {
+    fs.readFile('db/db.json', function (err, data) {
+        let userdata = JSON.parse(data)
+        const { text, title } = req.body;
+        const newnote = {
+            text,
+            title,
+            id: uuid()
+          };
+        userdata.push(newnote)
+        fs.writeFile('db/db.json', JSON.stringify(userdata, null, 4), function (err) {
+            if (err) throw err;
+            res.redirect("/notes")
+        })
+    })
 });
 
 notes.delete("/notes/:id", (req, res) => {
-  const Delete = req.params.id;
-  notesData = notesData.filter((note) => note.id !== Delete);
+    const Delete = req.params.id;
+    notesData = notesData.filter((note) => note.id !== Delete);
 
-  const notesString = JSON.stringify(notesData);
-
-  fs.writeFile(`./db/notes.json`, notesString, (err) => {
-    err ? console.log(err) : console.log(`New note for has been saved!`);
-    res.send();
-  });
+    const notesString = JSON.stringify(notesData);
+    fs.writeFile(`./db/notes.json`, notesString, (err) => {
+      err ? console.log(err) : console.log(`Saved`);
+      res.send();
+    });
 });
 
-
-module.exports = notes;
+module.exports = router;
